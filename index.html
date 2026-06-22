@@ -1,0 +1,499 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shutdown Feedback</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Carlito:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    /* ── LiveTrack brand tokens ── */
+    :root {
+      --bg:          #0d1e35;
+      --surface:     #162640;
+      --surface-2:   #1c3050;
+      --border:      #1e3252;
+      --border-hi:   #2a4a72;
+      --teal:        #5ab4d4;
+      --teal-dim:    #3a8aaa;
+      --amber:       #e89820;
+      --amber-border:#c8821a;
+      --text:        #ffffff;
+      --muted:       #6b8caa;
+      --muted-2:     #4a6a8a;
+      --success-bg:  #0d2a1a;
+      --success:     #4aaa6a;
+      --error-bg:    #2a0d0d;
+      --error:       #e05555;
+      --radius:      6px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Carlito', 'Calibri Light', Calibri, sans-serif;
+      font-weight: 400;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 16px 48px;
+    }
+
+    /* ── Header ── */
+    header {
+      width: 100%;
+      max-width: 640px;
+      padding: 36px 0 28px;
+      text-align: center;
+    }
+
+    .brand-lock {
+      display: inline-flex;
+      align-items: baseline;
+      gap: 0;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .brand-palm  { color: #ffffff; }
+    .brand-crest { color: var(--teal); }
+
+    .app-label {
+      margin-top: 6px;
+      font-size: 11px;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .shutdown-badge {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border-hi);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--teal);
+      letter-spacing: 1px;
+    }
+
+    /* ── Card ── */
+    .card {
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 28px;
+    }
+
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 22px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Form fields ── */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 7px;
+    }
+
+    label .req {
+      color: var(--amber);
+      margin-left: 3px;
+    }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 10px 13px;
+      outline: none;
+      transition: border-color 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--teal);
+    }
+
+    input[type="text"]::placeholder,
+    textarea::placeholder {
+      color: var(--muted-2);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b8caa' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 13px center;
+      padding-right: 36px;
+      cursor: pointer;
+    }
+
+    select option {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 110px;
+      line-height: 1.55;
+    }
+
+    /* ── Anon toggle ── */
+    .anon-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border-hi);
+      border-radius: var(--radius);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .anon-row:hover { border-color: var(--teal-dim); }
+
+    .toggle {
+      position: relative;
+      width: 38px;
+      height: 21px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { display: none; }
+
+    .toggle-track {
+      position: absolute;
+      inset: 0;
+      background: var(--border-hi);
+      border-radius: 21px;
+      transition: background 0.2s;
+    }
+
+    .toggle input:checked + .toggle-track { background: var(--teal-dim); }
+
+    .toggle-thumb {
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 15px;
+      height: 15px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(17px); }
+
+    .anon-label {
+      font-size: 13px;
+      color: var(--text);
+    }
+    .anon-sub {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+
+    /* ── Name/Trade collapse ── */
+    .identity-fields {
+      overflow: hidden;
+      transition: max-height 0.3s ease, opacity 0.3s ease;
+      max-height: 200px;
+      opacity: 1;
+    }
+    .identity-fields.hidden {
+      max-height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    @media (max-width: 440px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* ── Submit button ── */
+    .btn-submit {
+      width: 100%;
+      margin-top: 6px;
+      padding: 13px;
+      background: transparent;
+      border: 1.5px solid var(--amber-border);
+      border-radius: var(--radius);
+      color: var(--amber);
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: var(--amber-border);
+      color: #fff;
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ── Status messages ── */
+    .status {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .status.success {
+      display: block;
+      background: var(--success-bg);
+      border: 1px solid var(--success);
+      color: var(--success);
+    }
+
+    .status.error {
+      display: block;
+      background: var(--error-bg);
+      border: 1px solid var(--error);
+      color: var(--error);
+    }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 28px;
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--muted-2);
+    }
+
+    /* ── Loading spinner on submit ── */
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--amber-border);
+      border-top-color: var(--amber);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand-lock">
+      <span class="brand-palm">PALM</span><span class="brand-crest">CREST</span>
+    </div>
+    <div class="app-label">Scheduling Solutions</div>
+    <div class="shutdown-badge" id="shutdownBadge">Loading…</div>
+  </header>
+
+  <div class="card">
+    <div class="card-title">Submit Feedback</div>
+
+    <!-- Anonymous toggle -->
+    <div class="field">
+      <label for="anonToggle">Submission Type</label>
+      <label class="anon-row" for="anonToggle">
+        <div class="toggle">
+          <input type="checkbox" id="anonToggle" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </div>
+        <div>
+          <div class="anon-label">Submit anonymously</div>
+          <div class="anon-sub">Your name and trade will not be recorded</div>
+        </div>
+      </label>
+    </div>
+
+    <!-- Name + Trade (collapsible) -->
+    <div class="identity-fields" id="identityFields">
+      <div class="two-col" style="margin-bottom: 18px;">
+        <div class="field" style="margin-bottom:0">
+          <label for="fname">Name <span class="req">*</span></label>
+          <input type="text" id="fname" placeholder="e.g. John Smith" autocomplete="name" />
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label for="trade">Trade / Crew <span class="req">*</span></label>
+          <input type="text" id="trade" placeholder="e.g. Mechanical" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Category -->
+    <div class="field">
+      <label for="category">Category <span class="req">*</span></label>
+      <select id="category">
+        <option value="" disabled selected>Select a category…</option>
+        <option value="Recommendation">Recommendation</option>
+        <option value="General / Other">General / Other</option>
+      </select>
+    </div>
+
+    <!-- Feedback -->
+    <div class="field">
+      <label for="feedback">Feedback <span class="req">*</span></label>
+      <textarea id="feedback" placeholder="Share your thoughts, ideas, or concerns about this shutdown…"></textarea>
+    </div>
+
+    <!-- Submit -->
+    <button class="btn-submit" id="submitBtn" onclick="submitFeedback()">Submit Feedback</button>
+
+    <div class="status" id="statusMsg"></div>
+  </div>
+
+  <footer>Palm Crest Scheduling Solutions &nbsp;·&nbsp; Authorised Users Only</footer>
+
+  <script>
+    // ── CONFIG — update this URL after deploying your Apps Script ──
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbyzn0OoWSiX29ZwfAXa27-Qw3ckoubdKSYnJYjm-NBPS_ZENE9ZfrvzFBl4rqEnDdxB/exec";
+    // ──────────────────────────────────────────────────────────────
+
+    // Load shutdown name from GAS on page load
+    async function loadConfig() {
+      try {
+        const res  = await fetch(GAS_URL);
+        const data = await res.json();
+        if (data.ok && data.shutdownName) {
+          document.getElementById("shutdownBadge").textContent = data.shutdownName;
+        } else {
+          document.getElementById("shutdownBadge").textContent = "Feedback";
+        }
+      } catch (e) {
+        document.getElementById("shutdownBadge").textContent = "Feedback";
+      }
+    }
+
+    // Anonymous toggle — show/hide identity fields
+    document.getElementById("anonToggle").addEventListener("change", function () {
+      const fields = document.getElementById("identityFields");
+      if (this.checked) {
+        fields.classList.add("hidden");
+        document.getElementById("fname").value = "";
+        document.getElementById("trade").value = "";
+      } else {
+        fields.classList.remove("hidden");
+      }
+    });
+
+    // Submit
+    async function submitFeedback() {
+      const btn      = document.getElementById("submitBtn");
+      const statusEl = document.getElementById("statusMsg");
+      const isAnon   = document.getElementById("anonToggle").checked;
+      const name     = document.getElementById("fname").value.trim();
+      const trade    = document.getElementById("trade").value.trim();
+      const category = document.getElementById("category").value;
+      const feedback = document.getElementById("feedback").value.trim();
+
+      // Clear previous status
+      statusEl.className = "status";
+      statusEl.textContent = "";
+
+      // Validate
+      if (!category) { showError("Please select a category."); return; }
+      if (!feedback)  { showError("Please enter your feedback before submitting."); return; }
+      if (!isAnon && !name)  { showError("Please enter your name, or enable anonymous submission."); return; }
+      if (!isAnon && !trade) { showError("Please enter your trade / crew, or enable anonymous submission."); return; }
+
+      // Disable + loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span>Submitting…';
+
+      try {
+        const res = await fetch(GAS_URL, {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, trade, category, feedback, anonymous: isAnon })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          showSuccess("✓ " + data.message);
+          // Reset form
+          document.getElementById("fname").value     = "";
+          document.getElementById("trade").value     = "";
+          document.getElementById("category").value  = "";
+          document.getElementById("feedback").value  = "";
+          document.getElementById("anonToggle").checked = false;
+          document.getElementById("identityFields").classList.remove("hidden");
+        } else {
+          showError(data.error || "Submission failed. Please try again.");
+        }
+
+      } catch (err) {
+        showError("Could not reach the server. Check your connection and try again.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Submit Feedback";
+      }
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById("statusMsg");
+      el.className = "status success";
+      el.textContent = msg;
+    }
+
+    function showError(msg) {
+      const el = document.getElementById("statusMsg");
+      el.className = "status error";
+      el.textContent = msg;
+    }
+
+    loadConfig();
+  </script>
+</body>
+</html>
