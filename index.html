@@ -344,10 +344,10 @@
 
     <!-- Anonymous toggle -->
     <div class="field">
-      <label for="anonToggle">Submission Type</label>
-      <label class="anon-row" for="anonToggle">
+      <label>Submission Type</label>
+      <div class="anon-row" onclick="document.getElementById('anonToggle').click()">
         <div class="toggle">
-          <input type="checkbox" id="anonToggle" />
+          <input type="checkbox" id="anonToggle" onclick="event.stopPropagation()" />
           <div class="toggle-track"></div>
           <div class="toggle-thumb"></div>
         </div>
@@ -355,7 +355,7 @@
           <div class="anon-label">Submit anonymously</div>
           <div class="anon-sub">Your name and trade will not be recorded</div>
         </div>
-      </label>
+      </div>
     </div>
 
     <!-- Name + Trade (collapsible) -->
@@ -398,7 +398,7 @@
 
   <script>
     // ── CONFIG — update this URL after deploying your Apps Script ──
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbyzn0OoWSiX29ZwfAXa27-Qw3ckoubdKSYnJYjm-NBPS_ZENE9ZfrvzFBl4rqEnDdxB/exec";
+    const GAS_URL = "YOUR_GAS_DEPLOYMENT_URL_HERE";
     // ──────────────────────────────────────────────────────────────
 
     // Load shutdown name from GAS on page load
@@ -417,16 +417,18 @@
     }
 
     // Anonymous toggle — show/hide identity fields
-    document.getElementById("anonToggle").addEventListener("change", function () {
+    function handleAnonToggle() {
+      const cb     = document.getElementById("anonToggle");
       const fields = document.getElementById("identityFields");
-      if (this.checked) {
+      if (cb.checked) {
         fields.classList.add("hidden");
         document.getElementById("fname").value = "";
         document.getElementById("trade").value = "";
       } else {
         fields.classList.remove("hidden");
       }
-    });
+    }
+    document.getElementById("anonToggle").addEventListener("change", handleAnonToggle);
 
     // Submit
     async function submitFeedback() {
